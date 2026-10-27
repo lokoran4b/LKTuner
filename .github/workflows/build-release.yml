@@ -26,14 +26,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Instalar Build-Tools y Plataforma Android
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platforms;android-34" "build-tools;34.0.0"
-
       - name: Compilar APK con build.sh
         run: |
           chmod +x ./build.sh
@@ -57,10 +49,10 @@ jobs:
           files: LKTuner.apk
           body: |
             ### 🎸 LKTuner - Afinador de Guitarra PRO
-            Compilación automatizada continua de LKTuner para Android.
+            Compilación continua automatizada de LKTuner para Android.
             
             - **Descarga directa:** [LKTuner.apk](https://github.com/lokoran4b/LKTuner/releases/download/${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}/LKTuner.apk)
-            - **Sin anuncios, sin rastreadores y sin compras integradas.**
+            - **100% limpio:** Sin anuncios, sin rastreadores y sin compras integradas.
             - **Requisitos:** Android 8.0 o superior (API 26+).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
