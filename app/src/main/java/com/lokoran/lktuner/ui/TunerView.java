@@ -1,6 +1,5 @@
 package com.lokoran.lktuner.ui;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,18 +8,18 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 
-public class TunerView extends View implements ValueAnimator.AnimatorUpdateListener {
+public class TunerView extends View {
     private String displayedNote = "--";
     private String displayedOctave = "";
     private double targetFrequency = 0.0;
     private double currentFrequency = 0.0;
-    private float currentCents = 0f;
+    private float targetCents = 0f;
     private float animatedCents = 0f;
     private boolean isNoteActive = false;
     private boolean isInTune = false;
 
+    // Paleta de colores PRO
     private final int colorBgInTune = Color.parseColor("#1B5E20");
     private final int colorAccentGreen = Color.parseColor("#00E676");
     private final int colorAccentOrange = Color.parseColor("#FF9100");
@@ -39,7 +38,9 @@ public class TunerView extends View implements ValueAnimator.AnimatorUpdateListe
     private final Paint inTuneGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final RectF meterRect = new RectF();
-    private ValueAnimator animator;
+
+    // Factor de amortiguación para movimiento fluido a 60/120Hz
+    private static final float DAMPING_FACTOR = 0.22f;
 
     public TunerView(Context context) {
         super(context);
@@ -91,24 +92,23 @@ public class TunerView extends View implements ValueAnimator.AnimatorUpdateListe
         this.displayedOctave = active ? octave : "";
         this.targetFrequency = targetFreq;
         this.currentFrequency = detectedFreq;
-        this.currentCents = (float) Math.max(-50.0, Math.min(50.0, cents));
+        this.targetCents = active ? (float) Math.max(-50.0, Math.min(50.0, cents)) : 0f;
         this.isNoteActive = active;
-        this.isInTune = active && Math.abs(cents) <= 3.0;
 
-        if (animator != null) {
-            animator.cancel();
+        // Histéresis de afinación: entra a ±3 cents, sale a ±4.5 cents para evitar parpadeos
+        if (active) {
+            double absCents = Math.abs(cents);
+            if (!isInTune && absCents <= 3.0) {
+                isInTune = true;
+            } else if (isInTune && absCents > 4.5) {
+                isInTune = false;
+            }
+        } else {
+            isInTune = false;
         }
-        animator = ValueAnimator.ofFloat(animatedCents, currentCents);
-        animator.setDuration(90);
-        animator.setInterpolator(new DecelerateInterpolator());
-        animator.addUpdateListener(this);
-        animator.start();
-    }
 
-    @Override
-    public void onAnimationUpdate(ValueAnimator va) {
-        animatedCents = (Float) va.getAnimatedValue();
-        invalidate();
+        // Solicitar repintado continuo con animación
+        postInvalidateOnAnimation();
     }
 
     @Override
@@ -119,7 +119,16 @@ public class TunerView extends View implements ValueAnimator.AnimatorUpdateListe
         float h = getHeight();
         if (w <= 0 || h <= 0) return;
 
-        // 1. Resplandor verde de afinación completa
+        // Suavizado exponencial continuo de la aguja
+        float centsDiff = targetCents - animatedCents;
+        if (Math.abs(centsDiff) > 0.05f) {
+            animatedCents += centsDiff * DAMPING_FACTOR;
+            postInvalidateOnAnimation();
+        } else {
+            animatedCents = targetCents;
+        }
+
+        // 1. Resplandor verde de afinación
         if (isInTune) {
             inTuneGlowPaint.setColor(colorBgInTune);
             canvas.drawRect(0, 0, w, h, inTuneGlowPaint);
@@ -133,7 +142,7 @@ public class TunerView extends View implements ValueAnimator.AnimatorUpdateListe
         notePaint.setColor(isInTune ? colorAccentGreen : colorTextPrimary);
         canvas.drawText(displayedNote, centerX, centerY, notePaint);
 
-        // Octava al lado de la nota
+        // Subíndice de octava al lado de la nota
         if (!displayedOctave.isEmpty()) {
             octavePaint.setTextSize(h * 0.09f);
             octavePaint.setColor(isInTune ? colorAccentGreen : colorTextSecondary);
@@ -144,7 +153,7 @@ public class TunerView extends View implements ValueAnimator.AnimatorUpdateListe
         // 3. Frecuencia y desviación
         textInfoPaint.setTextSize(h * 0.045f);
         if (isNoteActive) {
-            String centsStr = (currentCents >= 0 ? "+" : "") + Math.round(currentCents) + " ¢";
+            String centsStr = (animatedCents >= 0 ? "+" : "") + Math.round(animatedCents) + " ¢";
             String freqStr = String.format("%.1f Hz / %.1f Hz", currentFrequency, targetFrequency);
             textInfoPaint.setColor(isInTune ? colorAccentGreen : colorTextSecondary);
             canvas.drawText(freqStr + "   (" + centsStr + ")", centerX, centerY + (h * 0.09f), textInfoPaint);

@@ -35,16 +35,16 @@ public class Tuning {
     }
 
     public GuitarString findClosestString(double frequency, double a4Reference) {
-        if (strings.isEmpty()) {
+        if (strings.isEmpty() || frequency <= 20.0) {
             return null;
         }
         GuitarString closest = null;
-        double minDiff = Double.MAX_VALUE;
+        double minLogDiff = Double.MAX_VALUE;
         for (GuitarString gs : strings) {
             Note currentNote = Note.fromMidi(gs.getNote().getMidiNumber(), a4Reference);
-            double diff = Math.abs(currentNote.getFrequency() - frequency);
-            if (diff < minDiff) {
-                minDiff = diff;
+            double logDiff = Math.abs(Math.log(frequency / currentNote.getFrequency()));
+            if (logDiff < minLogDiff) {
+                minLogDiff = logDiff;
                 closest = gs;
             }
         }

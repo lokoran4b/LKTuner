@@ -217,21 +217,28 @@ public class MainActivity extends Activity implements AudioEngineListener, Adapt
         }
 
         GuitarString targetString = lockedString != null ? lockedString : currentTuning.findClosestString(result.getFrequency(), a4Reference);
+        boolean useGuitarString = false;
 
         if (targetString != null && !currentTuning.getStrings().isEmpty()) {
             Note targetNote = Note.fromMidi(targetString.getNote().getMidiNumber(), a4Reference);
             double cents = 1200.0 * (Math.log(result.getFrequency() / targetNote.getFrequency()) / Math.log(2.0));
 
-            tunerView.setTuningState(
-                targetNote.getName(),
-                String.valueOf(targetNote.getOctave()),
-                targetNote.getFrequency(),
-                result.getFrequency(),
-                cents,
-                true
-            );
-            highlightActiveString(targetString);
-        } else {
+            // Si está bloqueada manualmente o está dentro del rango de captura de la cuerda (±3 semitonos)
+            if (lockedString != null || Math.abs(cents) <= 300.0) {
+                useGuitarString = true;
+                tunerView.setTuningState(
+                    targetNote.getName(),
+                    String.valueOf(targetNote.getOctave()),
+                    targetNote.getFrequency(),
+                    result.getFrequency(),
+                    cents,
+                    true
+                );
+                highlightActiveString(targetString);
+            }
+        }
+
+        if (!useGuitarString) {
             NoteInfo noteInfo = Note.fromFrequency(result.getFrequency(), a4Reference);
             if (noteInfo != null) {
                 tunerView.setTuningState(
@@ -242,6 +249,9 @@ public class MainActivity extends Activity implements AudioEngineListener, Adapt
                     noteInfo.getCentsDeviation(),
                     true
                 );
+                if (lockedString == null) {
+                    highlightActiveString(null);
+                }
             }
         }
     }
