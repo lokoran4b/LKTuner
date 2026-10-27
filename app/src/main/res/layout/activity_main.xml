@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#121212">
+
+    <!-- Barra Superior / Header de LKTuner -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:background="#1E1E1E">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LKTuner"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="PRO"
+            android:textColor="#00E676"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:background="#1B5E20" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- Calibrador de Frecuencia A4 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btnCalibrateDown"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="-"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:background="#333333" />
+
+            <TextView
+                android:id="@+id/tvCalibrateFreq"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A4: 440 Hz"
+                android:textColor="#E0E0E0"
+                android:textSize="13sp"
+                android:layout_marginHorizontal="6dp" />
+
+            <Button
+                android:id="@+id/btnCalibrateUp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="+"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:background="#333333" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Selector de Afinación de Guitarra -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:background="#181818">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Afinación:"
+            android:textColor="#9E9E9E"
+            android:textSize="14sp" />
+
+        <Spinner
+            android:id="@+id/spinnerTunings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="#00E676" />
+    </LinearLayout>
+
+    <!-- Vista de Afinador (Canvas personalizado con aguja e indicador de nota) -->
+    <com.lokoran.lktuner.ui.TunerView
+        android:id="@+id/tunerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Selector de Cuerdas de Guitarra (Modo Manual / Bloqueo o Detección Automática) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="#1E1E1E">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvModeStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Modo: Detección Automática"
+                android:textColor="#B0BEC5"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnAutoMode"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:text="AUTO"
+                android:textSize="11sp"
+                android:textColor="#00E676"
+                android:background="#263238" />
+        </LinearLayout>
+
+        <!-- Botones de las 6 cuerdas -->
+        <LinearLayout
+            android:id="@+id/layoutStrings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <!-- Los botones de cuerda se inyectan dinámicamente según la afinación seleccionada -->
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
